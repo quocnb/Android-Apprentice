@@ -3,11 +3,13 @@ package com.quocnb.timefighter
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 
-private const val INITIAL_TIME_LEFT = 5
+private const val INITIAL_TIME_LEFT = 30
+private val TAG = MainActivity::class.java.simpleName
 
 class MainActivity : AppCompatActivity() {
 
@@ -18,9 +20,13 @@ class MainActivity : AppCompatActivity() {
 
     private var score = 0
     private var gameStarted = false
-    private var initialCountDown: Long = INITIAL_TIME_LEFT.toLong() * 1000
     private var countDownInterval: Long = 1000
     private var timeLeft = INITIAL_TIME_LEFT
+
+    companion object {
+        private val SCORE_KEY = "SCORE_KEY"
+        private val TIME_LEFT_KEY = "TIME_LEFT_KEY"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,12 +34,24 @@ class MainActivity : AppCompatActivity() {
         // connect views to variables
         gameScoreTextView = findViewById(R.id.A01_game_score_tv)
         timeLeftTextView = findViewById(R.id.A01_time_left_tv)
-
         tapMeButton = findViewById(R.id.A01_tap_me_btn)
         tapMeButton.setOnClickListener {
             incrementScore()
         }
-        resetGame()
+        setupGame(savedInstanceState)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt(SCORE_KEY, score)
+        outState.putInt(TIME_LEFT_KEY, timeLeft)
+        countDownTimer.cancel()
+        Log.d(TAG, "Saving score: $score and time left: $timeLeft")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG, "onDestroy called")
     }
 
     private fun updateGameScoreText() {
@@ -53,12 +71,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun resetGame() {
+        setupGame(null)
+    }
+
+    private fun recoverGame(savedInstanceState: Bundle?) {
+        setupGame(savedInstanceState)
+    }
+
+    private fun setupGame(savedInstanceState: Bundle?) {
         score = 0
-        updateGameScoreText()
         timeLeft = INITIAL_TIME_LEFT
+        savedInstanceState?.let {
+            score = savedInstanceState.getInt(SCORE_KEY)
+            timeLeft = savedInstanceState.getInt(TIME_LEFT_KEY)
+        }
+        Log.d(TAG, "time left: $timeLeft")
+        updateGameScoreText()
         updateTimeLeftText()
 
-        countDownTimer = object : CountDownTimer(initialCountDown, countDownInterval) {
+        countDownTimer = object : CountDownTimer((timeLeft * 1000).toLong(), countDownInterval) {
             override fun onTick(millisUntilFinished: Long) {
                 timeLeft = millisUntilFinished.toInt() / 1000
                 updateTimeLeftText()
@@ -67,7 +98,12 @@ class MainActivity : AppCompatActivity() {
                 endGame()
             }
         }
-        gameStarted = false
+        gameStarted = if (savedInstanceState != null) {
+            countDownTimer.start()
+            true
+        } else {
+            false
+        }
     }
 
     private fun startGame() {
