@@ -4,4 +4,7 @@
     <string name="game_score_tv">Your Score: %s</string>
     <string name="time_left_tv">Time left: %s</string>
     <string name="game_over_message">Times up! Your score was: %s</string>
+    <string name="A00_action_settings_title">About</string>
+    <string name="A00_about_dialog_title">Timefighter %s</string>
+    <string name="A00_about_dialog_message">Created by Quoc Nguyen</string>
 </resources>

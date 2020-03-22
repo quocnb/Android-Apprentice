@@ -1,9 +1,16 @@
 package com.quocnb.timefighter
 
+import android.app.AlertDialog
+import android.app.Dialog
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
+import android.view.ContextMenu
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -24,8 +31,8 @@ class MainActivity : AppCompatActivity() {
     private var timeLeft = INITIAL_TIME_LEFT
 
     companion object {
-        private val SCORE_KEY = "SCORE_KEY"
-        private val TIME_LEFT_KEY = "TIME_LEFT_KEY"
+        private const val SCORE_KEY = "SCORE_KEY"
+        private const val TIME_LEFT_KEY = "TIME_LEFT_KEY"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,6 +43,8 @@ class MainActivity : AppCompatActivity() {
         timeLeftTextView = findViewById(R.id.A01_time_left_tv)
         tapMeButton = findViewById(R.id.A01_tap_me_btn)
         tapMeButton.setOnClickListener {
+            val bounceAnimation = AnimationUtils.loadAnimation(this, R.anim.bounce)
+            it.startAnimation(bounceAnimation)
             incrementScore()
         }
         setupGame(savedInstanceState)
@@ -49,9 +58,30 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "Saving score: $score and time left: $timeLeft")
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        super.onCreateOptionsMenu(menu)
+        menuInflater.inflate(R.menu.menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        super.onOptionsItemSelected(item)
+        if (item.itemId == R.id.A00_action_settings) {
+            showInfo()
+        }
+        return true
+    }
     override fun onDestroy() {
         super.onDestroy()
         Log.d(TAG, "onDestroy called")
+    }
+
+    private fun showInfo() {
+        val dialogTitle = getString(R.string.A00_about_dialog_title, BuildConfig.VERSION_NAME)
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(dialogTitle)
+        builder.setMessage(R.string.A00_about_dialog_message)
+        builder.create().show()
     }
 
     private fun updateGameScoreText() {
