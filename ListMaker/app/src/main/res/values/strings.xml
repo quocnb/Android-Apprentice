@@ -2,4 +2,6 @@
     <string name="app_name">ListMaker</string>
     <string name="A01_name_of_list">What is the name of your list?</string>
     <string name="A01_create_list">Create</string>
+    <string name="A02_add_task">Add</string>
+    <string name="A02_task_to_add">What is the task you want to add?</string>
 </resources>
